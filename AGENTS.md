@@ -1,44 +1,44 @@
 # AGENTS.md
 
-Mandatory rules for any AI agent or person working on `mottor-ai-front`. Follow them on every task.
+Reglas obligatorias para cualquier agente de IA o persona que trabaje en `mottor-ai-front`. Síguelas en cada tarea.
 
-## Source of truth: mottor-ai-specs
+## Fuente de verdad: mottor-ai-specs
 
-1. **Read the specs before any task.** Open [mottor-ai-specs](https://github.com/Juanperezc/mottor-ai-specs) and read:
-   - the constitution: `.specify/memory/constitution.md`;
-   - the feature spec in `specs/<feature>/`: `spec.md`, `plan.md`, `tasks.md` and `fixtures/`.
-2. **No spec, no code.** Do not write code unless a spec requirement and a task in `tasks.md` back it.
-3. **The spec wins.** If code and spec disagree, the spec is right. Stop, and propose the change as a PR to `mottor-ai-specs`. Change code only after the spec is updated.
-4. **Never create specs here.** No `spec.md`, `plan.md`, `tasks.md` or `fixtures/` in this repo. Specs live only in `mottor-ai-specs`.
-5. **Follow the backend contract.** Request and response shapes come from the OpenAPI published by `mottor-ai-back` (`docs/api/openapi.json` in that repo, or `/docs/api.json` on a running backend). Do not add, rename or drop fields on your own; contract changes are made in `mottor-ai-back`.
+1. **Lee las specs antes de cualquier tarea.** Abre [mottor-ai-specs](https://github.com/Juanperezc/mottor-ai-specs) y lee:
+   - la constitución: `.specify/memory/constitution.md`;
+   - la spec de la feature en `specs/<feature>/`: `spec.md`, `plan.md`, `tasks.md` y `fixtures/`.
+2. **Sin spec, no hay código.** No escribas código si no lo respaldan un requisito de la spec y una tarea en `tasks.md`.
+3. **La spec manda.** Si el código y la spec no coinciden, la spec tiene razón. Detente y propón el cambio como PR a `mottor-ai-specs`. Cambia el código solo después de que se actualice la spec.
+4. **Nunca crees specs aquí.** Nada de `spec.md`, `plan.md`, `tasks.md` ni `fixtures/` en este repo. Las specs viven solo en `mottor-ai-specs`.
+5. **Respeta el contrato del backend.** La forma de los requests y responses sale del OpenAPI que publica `mottor-ai-back` (`docs/api/openapi.json` en ese repo, o `/docs/api.json` en un backend en ejecución). No agregues, renombres ni elimines campos por tu cuenta; los cambios de contrato se hacen en `mottor-ai-back`.
 
-## Git workflow
+## Flujo de Git
 
-6. Branch from `staging`: `feat/`, `fix/`, `refactor/`, `test/`, `docs/`, `chore/`.
-7. Use [Conventional Commits](https://www.conventionalcommits.org/): `<type>(<scope>): <imperative summary>`.
-8. Open the PR to `staging`. Release with a PR from `staging` to `main`. Never push directly to `staging` or `main`.
-9. Every PR body references the spec and the tasks it implements:
+6. Crea la rama desde `staging`: `feat/`, `fix/`, `refactor/`, `test/`, `docs/`, `chore/`.
+7. Usa [Conventional Commits](https://www.conventionalcommits.org/): `<type>(<scope>): <imperative summary>`.
+8. Abre el PR a `staging`. El release se hace con un PR de `staging` a `main`. Nunca hagas push directo a `staging` ni a `main`.
+9. La descripción de cada PR referencia la spec y las tareas que implementa:
 
    ```text
    Spec: 001-quotes-mvp
    Tasks: T021, T023
    ```
 
-   Docs or chores with no spec use `Spec: N/A (docs)` and `Tasks: N/A`.
+   Los PR de documentación o de chores sin spec usan `Spec: N/A (docs)` y `Tasks: N/A`.
 
-## Language
+## Idioma
 
-10. Code, identifiers, comments, commits and docs in this repo: **English**.
-11. Specs in `mottor-ai-specs`: **Spanish**.
+10. Código, identificadores, comentarios y commits: **inglés**. README y documentación: **español**.
+11. Specs en `mottor-ai-specs`: **español**.
 
-## Quality
+## Calidad
 
-12. Keep tests green. Add or update tests with every behavior change, using the spec fixtures as test cases.
-13. Do not lower test coverage. Run the coverage command in `README.md` before opening a PR.
-14. If you are unsure, stop and ask. Do not guess requirements.
+12. Mantén los tests en verde. Agrega o actualiza tests con cada cambio de comportamiento, usando los fixtures de la spec como casos de prueba.
+13. No bajes la cobertura de tests. Ejecuta el comando de cobertura de `README.md` antes de abrir un PR.
+14. Si tienes dudas, detente y pregunta. No adivines requisitos.
 
-## Frontend specifics
+## Específico del frontend
 
-15. Generate API types from the backend's OpenAPI (`npm run gen:api`). Do not hand-write API types.
-16. Use strict TypeScript. No `any` without a comment explaining why.
-17. Run `npm run test:coverage` before opening a PR.
+15. Genera los tipos de la API a partir del OpenAPI del backend (`npm run gen:api`). No escribas tipos de la API a mano.
+16. Usa TypeScript estricto. Nada de `any` sin un comentario que explique por qué.
+17. Ejecuta `npm run test:coverage` antes de abrir un PR.
