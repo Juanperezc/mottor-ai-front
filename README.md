@@ -1,42 +1,96 @@
-# mottor-ai-front · Spec-Driven Development
+# mottor-ai-front
 
-Frontend React + TypeScript del *Mottor.ai Senior Full-Stack Challenge* (proyecto de prueba). Se trabaja con **Spec-Driven Development** según [GitHub Spec Kit](https://github.com/github/spec-kit): primero la especificación y después el código.
+React + TypeScript (Vite) SPA for **Mottor AI**, the *Mottor.ai Senior Full-Stack Challenge* ("Quote calculator with commercial rules").
 
-## Flujo SDD
+> Working on this repo? Read [AGENTS.md](AGENTS.md) first. Following the specs is mandatory.
 
-| Paso | Comando Spec Kit | Resultado | Gate |
-|---|---|---|---|
-| 1. Constitution | `/speckit-constitution` | `.specify/memory/constitution.md` | Aprobada por Juan |
-| 2. Spec | `/speckit-specify` | `specs/NNN-feature/spec.md` (Draft) | — |
-| 3. Clarify | `/speckit-clarify` | Se resuelven los `[NEEDS CLARIFICATION]` | spec **Approved** por Juan |
-| 4. Plan | `/speckit-plan` | `plan.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md` | Constitution Check ✅ |
-| 5. Tasks | `/speckit-tasks` (+ `/speckit-analyze`) | `tasks.md` | — |
-| 6. Implement | `/speckit-implement` | Código + tests, una rama por feature (`NNN-feature`) | CI verde + review |
+## Specs
 
-**Regla de oro**: ninguna tarea se implementa sin una spec aprobada por Juan.
+This repo does **not** contain specs. The spec, the OpenAPI contract, the plan, the tasks and the fixtures live in **[mottor-ai-specs](https://github.com/Juanperezc/mottor-ai-specs)** (spec-anchored, GitHub Spec Kit):
 
-## Dónde está cada cosa
+- Constitution: [`.specify/memory/constitution.md`](https://github.com/Juanperezc/mottor-ai-specs/blob/main/.specify/memory/constitution.md)
+- Feature specs: [`specs/`](https://github.com/Juanperezc/mottor-ai-specs/tree/main/specs) (`spec.md`, `plan.md`, `tasks.md`, `contracts/openapi.yaml`, `fixtures/`)
 
-```text
-.specify/
-├── memory/constitution.md   # principios no negociables (SOLID, contrato, sin float, tests...)
-└── templates/               # plantillas oficiales de Spec Kit (spec, plan, tasks, checklist, constitution)
-specs/
-└── 001-quotes-mvp/          # Feature 1: Dashboard, Import, Quote Detail (estado: Draft)
-    ├── spec.md              # user stories + requisitos (compartida con mottor-ai-back)
-    ├── plan.md              # stack y arquitectura de este repo
-    ├── research.md          # decisiones técnicas y alternativas
-    ├── data-model.md        # modelo de datos de este repo
-    ├── quickstart.md        # cómo validar end-to-end
-    ├── contracts/openapi.yaml  # contrato de API (idéntico en mottor-ai-back)
-    └── tasks.md             # tareas numeradas con dependencias y [P]
+If a change alters behavior, update the spec in `mottor-ai-specs` **first**, then the code.
+
+## Tech stack
+
+| Area | Technology |
+|---|---|
+| UI | React |
+| Language | TypeScript (strict) |
+| Build tool | Vite |
+| Real-time | [Laravel Echo](https://laravel.com/docs/broadcasting#client-side-installation) + `pusher-js`, connected to the backend's Laravel Reverb (import progress and errors) |
+| API types | Generated from `contracts/openapi.yaml` in mottor-ai-specs |
+| Tests | Vitest + Testing Library |
+| Coverage | `@vitest/coverage-v8` |
+
+## Quick start
+
+```bash
+git clone https://github.com/Juanperezc/mottor-ai-specs ../mottor-ai-specs   # default SPECS_PATH
+npm install
+npm run dev
+npm test
 ```
 
-## Convenciones
+## Test coverage
 
-- `spec.md` y `contracts/openapi.yaml` son **copias idénticas** en `mottor-ai-back` y `mottor-ai-front`. Si se cambian, se cambian en los dos repos en el mismo PR o ciclo.
-- `[NEEDS CLARIFICATION: ...]` marca supuestos pendientes. Todavía no tenemos el enunciado oficial del challenge.
-- Documentación en español; código, identificadores y OpenAPI en inglés.
-- En `tasks.md`, `[P]` significa paralelizable y `[USn]` es la user story.
+Planned script (added to `package.json` when the app is scaffolded):
 
-Para usar los comandos `/speckit-*` con un agente: `uv tool install specify-cli` y después `specify init --here` (conservando los archivos existentes).
+```json
+{
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage"
+  }
+}
+```
+
+With `@vitest/coverage-v8` installed (`npm i -D @vitest/coverage-v8`) and `coverage.provider: 'v8'` plus `reporter: ['text', 'html', 'lcov']` in `vitest.config.ts`:
+
+```bash
+npm run test:coverage
+```
+
+Where to look:
+
+- Terminal: the text summary printed at the end of the run.
+- HTML report: open `coverage/index.html`.
+- CI: `coverage/lcov.info` (uploaded as a build artifact).
+
+Set `coverage.thresholds` in `vitest.config.ts` to fail the run when coverage drops. `coverage/` is a build output and must not be committed.
+
+### Current coverage
+
+There is no application code yet, so there is no coverage to report. This table is updated when tests exist.
+
+| Scope | Lines | Target |
+|---|---|---|
+| Domain (ticket preview, money formatting) | TBD | TBD |
+| Components and pages | TBD | TBD |
+| Total | TBD | TBD |
+
+## Git flow
+
+```text
+staging ──► feat/<scope>-<description> ──PR──► staging ──PR (release)──► main
+```
+
+- Branch from `staging`: `feat/`, `fix/`, `refactor/`, `test/`, `docs/`, `chore/`.
+- PR to `staging` with green CI and review. Release with a PR from `staging` to `main`. No direct commits to `staging` or `main`.
+
+## Conventional Commits
+
+`<type>(<optional scope>): <imperative description>`. Types: `feat`, `fix`, `refactor`, `test`, `docs`, `style`, `perf`, `build`, `ci`, `chore`, `revert`.
+
+```text
+feat(quotes): add dashboard filters synced with url
+
+Spec: 001-quotes-mvp
+Tasks: T018, T019
+```
+
+## Referencing the spec in PRs
+
+Every PR body includes `Spec: <feature>` and `Tasks: T0xx, ...` (task IDs from `tasks.md` in mottor-ai-specs). After merging, tick the tasks `[x]` in mottor-ai-specs.
