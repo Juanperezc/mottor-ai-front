@@ -6,10 +6,10 @@ React + TypeScript (Vite) SPA for **Mottor AI**, the *Mottor.ai Senior Full-Stac
 
 ## Specs
 
-This repo does **not** contain specs. The spec, the OpenAPI contract, the plan, the tasks and the fixtures live in **[mottor-ai-specs](https://github.com/Juanperezc/mottor-ai-specs)** (spec-anchored, GitHub Spec Kit):
+This repo does **not** contain specs. The spec, the plan, the tasks and the fixtures live in **[mottor-ai-specs](https://github.com/Juanperezc/mottor-ai-specs)** (spec-anchored, GitHub Spec Kit):
 
 - Constitution: [`.specify/memory/constitution.md`](https://github.com/Juanperezc/mottor-ai-specs/blob/main/.specify/memory/constitution.md)
-- Feature specs: [`specs/`](https://github.com/Juanperezc/mottor-ai-specs/tree/main/specs) (`spec.md`, `plan.md`, `tasks.md`, `contracts/openapi.yaml`, `fixtures/`)
+- Feature specs: [`specs/`](https://github.com/Juanperezc/mottor-ai-specs/tree/main/specs) (`spec.md`, `plan.md`, `tasks.md`, `fixtures/`)
 
 If a change alters behavior, update the spec in `mottor-ai-specs` **first**, then the code.
 
@@ -21,17 +21,36 @@ If a change alters behavior, update the spec in `mottor-ai-specs` **first**, the
 | Language | TypeScript (strict) |
 | Build tool | Vite |
 | Real-time | [Laravel Echo](https://laravel.com/docs/broadcasting#client-side-installation) + `pusher-js`, connected to the backend's Laravel Reverb (import progress and errors) |
-| API types | Generated from `contracts/openapi.yaml` in mottor-ai-specs |
+| API types | Generated with `openapi-typescript` from the OpenAPI published by [mottor-ai-back](https://github.com/Juanperezc/mottor-ai-back) (Scramble) |
 | Tests | Vitest + Testing Library |
 | Coverage | `@vitest/coverage-v8` |
 
 ## Quick start
 
 ```bash
-git clone https://github.com/Juanperezc/mottor-ai-specs ../mottor-ai-specs   # default SPECS_PATH
+git clone https://github.com/Juanperezc/mottor-ai-specs ../mottor-ai-specs
+git clone https://github.com/Juanperezc/mottor-ai-back ../mottor-ai-back     # default BACK_PATH (API contract)
 npm install
+npm run gen:api   # API types from the backend's OpenAPI
 npm run dev
 npm test
+```
+
+## API types
+
+The API contract is owned by `mottor-ai-back`, which generates it with Scramble. This repo never keeps its own copy. Types are generated into `src/api/schema.d.ts` (committed) from one of:
+
+- the exported file in the backend repo: `${BACK_PATH:-../mottor-ai-back}/docs/api/openapi.json`;
+- a running backend: `${VITE_API_URL}/docs/api.json` (Swagger UI at `/docs/api`).
+
+Planned script:
+
+```json
+{
+  "scripts": {
+    "gen:api": "openapi-typescript ${BACK_PATH:-../mottor-ai-back}/docs/api/openapi.json -o src/api/schema.d.ts"
+  }
+}
 ```
 
 ## Test coverage
