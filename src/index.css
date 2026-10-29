@@ -1,0 +1,148 @@
+@import 'tailwindcss';
+
+/* Tokens from the Paper file "Mottor AI – Quotes UI" */
+@theme {
+  --color-bg: #ffffff;
+  --color-bg-subtle: #f5f5f5;
+  --color-surface: #ffffff;
+  --color-ink: #0a0a0a;
+  --color-ink-secondary: #6b6b6b;
+  --color-ink-muted: #9a9a9a;
+  --color-border: #e5e5e5;
+  --color-border-strong: #0a0a0a;
+  --color-accent: #2563eb;
+  --color-accent-subtle: #eff4ff;
+  --color-success: #15803d;
+  --color-success-subtle: #f0faf3;
+  --color-warning: #b45309;
+  --color-warning-subtle: #fef6e7;
+  --color-error: #b91c1c;
+  --color-error-subtle: #fdf0ef;
+  --color-dark-bg: #0a0a0a;
+  --color-dark-surface: #171717;
+  --color-dark-border: #2b2b2b;
+  --color-dark-ink: #f2f2f2;
+  --color-dark-ink-secondary: #9a9a9a;
+  /* Printed ticket (Paper 05 · Detalle: raw values on the ticket frame) */
+  --color-paper: #fffdf7;
+  --color-paper-rule: #c9c4b4;
+  --color-paper-muted: #a8a192;
+
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --text-micro: 10px;
+  --text-eyebrow: 11px;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-brand: 14px;
+  --text-brand--line-height: 18px;
+  --text-md: 18px;
+  --text-lg: 24px;
+  --text-xl: 32px;
+  --tracking-eyebrow: 0.08em;
+  --tracking-label: 0.06em;
+  --tracking-tight: -0.01em;
+  --leading-ticket: 22px;
+
+  --shadow-popover: 0 8px 30px rgb(0 0 0 / 0.08);
+  --container-popover: min(340px, calc(100vw - 2rem));
+  --container-aside: 420px;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+}
+
+@layer base {
+  body {
+    @apply bg-bg font-sans text-sm text-ink antialiased;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+}
+
+/* Repeated class combos live here, not copied across components (AGENTS.md, UI rules). */
+@utility eyebrow {
+  @apply font-mono text-eyebrow tracking-eyebrow text-ink-secondary uppercase;
+}
+
+@utility eyebrow-sm {
+  @apply eyebrow text-micro;
+}
+
+@utility caption-mono {
+  @apply font-mono text-xs text-ink-secondary;
+}
+
+@utility heading-section {
+  @apply text-base font-semibold;
+}
+
+@utility px-page {
+  @apply px-4 sm:px-8;
+}
+
+@utility card {
+  @apply rounded-md border border-border bg-surface;
+}
+
+/* 28 monospace columns + a slot for the "n/28" count */
+@utility grid-cols-ticket {
+  grid-template-columns: 28ch 3.5ch;
+}
+
+@utility ticket-count {
+  font-size: 9px;
+  line-height: 12px;
+}
+
+@utility grid-cols-detail {
+  grid-template-columns: 1fr var(--container-aside);
+}
+
+@utility tnum {
+  font-feature-settings: 'tnum';
+}
+
+@utility btn {
+  @apply inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-4 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility btn-primary {
+  @apply btn bg-ink text-white hover:bg-dark-surface;
+}
+
+@utility btn-secondary {
+  @apply btn border border-border bg-surface text-ink hover:bg-bg-subtle;
+}
+
+@utility field {
+  @apply h-9 rounded-md border border-border bg-surface px-3 text-sm text-ink;
+}
+
+@layer components {
+  .switch-root {
+    @apply inline-flex h-4 w-7 shrink-0 cursor-pointer items-center rounded-full border border-transparent bg-border transition-colors;
+  }
+  .switch-root[data-state='checked'] {
+    @apply bg-ink;
+  }
+  .switch-thumb {
+    @apply block size-3 translate-x-0.5 rounded-full bg-white shadow transition-transform;
+  }
+  .switch-root[data-state='checked'] .switch-thumb {
+    @apply translate-x-3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
