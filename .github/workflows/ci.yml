@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [staging, main]
+  pull_request:
+    branches: [staging, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Lint, typecheck, build + Vitest (coverage)
+    runs-on: ubuntu-latest
+    outputs:
+      coverage: ${{ steps.coverage.outputs.coverage }}
+      tests: ${{ steps.coverage.outputs.tests }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (ESLint + Prettier)
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Vitest with coverage
+        run: >-
+          npx vitest run --coverage
+          --coverage.reporter=text --coverage.reporter=json-summary --coverage.reporter=html
+          --reporter=default --reporter=junit --outputFile.junit=coverage/junit.xml
+
+      - name: Coverage summary
+        id: coverage
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import xml.etree.ElementTree as ET
+
+          total = json.load(open("coverage/coverage-summary.json"))["total"]
+          tests = int(ET.parse("coverage/junit.xml").getroot().get("tests"))
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"coverage={total['lines']['pct']:.1f}\ntests={tests}\n")
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as out:
+              out.write("## Cobertura (Vitest)\n\n")
+              out.write(f"**{tests} tests OK**\n\n")
+              out.write("| Métrica | Cubierto | Total | % |\n| --- | --- | --- | --- |\n")
+              for key, name in (("statements", "Statements"), ("branches", "Branches"), ("functions", "Functions"), ("lines", "Lines")):
+                  m = total[key]
+                  out.write(f"| {name} | {m['covered']} | {m['total']} | {m['pct']:.2f}% |\n")
+          PY
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-front
+          path: coverage/
+          if-no-files-found: ignore
+
+  badges:
+    name: Publish badges
+    needs: tests
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: badges-${{ github.repository }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+      - name: Commit badges to the badges branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: .github/scripts/publish-badges.sh "${{ needs.tests.outputs.coverage }}" "${{ needs.tests.outputs.tests }}"
