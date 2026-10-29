@@ -63,6 +63,32 @@ describe('sync import (A44)', () => {
     expect(file()).toMatchObject({ imported: 700, failedBatches: 1 });
   });
 
+  it('translates the 422 message and field messages before storing them', async () => {
+    server.use(
+      http.post(`${API}/quotes/batch`, () =>
+        HttpResponse.json(
+          {
+            message: 'The given data was invalid.',
+            errors: {
+              'quotes.0.exchange_rates': ['A direct or inverse EUR/ARS exchange rate is required.'],
+            },
+          },
+          { status: 422 },
+        ),
+      ),
+    );
+    loadOne(1);
+    await store().start('sync');
+
+    expect(file().batches[0]?.state).toEqual({
+      status: 'failed',
+      errors: {
+        'quotes.0.exchange_rates': ['Falta la tasa de cambio EUR/ARS (directa o inversa).'],
+      },
+      message: 'Los datos enviados no son válidos.',
+    });
+  });
+
   it('a non-422 answer fails the batch with a general error', async () => {
     server.use(
       http.post(`${API}/quotes/batch`, () =>

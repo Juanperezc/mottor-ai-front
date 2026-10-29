@@ -1,5 +1,6 @@
 import { memo, useCallback, useId, useMemo, useState } from 'react';
 import { groupErrorsByQuote, type QuoteErrors } from '../../shared/http/validation';
+import { translateApiMessage } from '../../shared/http/messages';
 import { lines } from '../../shared/ticket/lines';
 import { TicketRows } from '../../shared/ticket/TicketRows';
 import { Modal } from '../../shared/ui/Modal';
@@ -101,7 +102,7 @@ const QuoteErrorCard = memo(function QuoteErrorCard({
       {fields.map(({ path, messages }) => (
         <div key={path} className="flex flex-col gap-2">
           <div className="flex flex-wrap items-baseline justify-between gap-x-4 text-error">
-            <span>{messages.join(' ')}</span>
+            <span>{messages.map(translateApiMessage).join(' ')}</span>
             <code className="font-mono text-eyebrow">{path || `quotes.${index}`}</code>
           </div>
           {path && (
@@ -245,14 +246,15 @@ export function ImportErrorsModal({ batch, onRetry, onClose }: Props) {
     >
       {failed?.message && (
         <pre className="rounded-md border border-border bg-bg-subtle px-3.5 py-3 font-mono text-eyebrow whitespace-pre-wrap text-ink-muted">
-          {`{ "message": ${JSON.stringify(failed.message)},\n  "errors": { ${JSON.stringify(paths[0] ?? '')}: [...]${paths.length > 1 ? ', …' : ''} } }`}
+          {`{ "message": ${JSON.stringify(translateApiMessage(failed.message))},\n  "errors": { ${JSON.stringify(paths[0] ?? '')}: [...]${paths.length > 1 ? ', …' : ''} } }`}
         </pre>
       )}
       {Object.keys(general).length > 0 && (
         <ul className="rounded-md border border-border bg-bg-subtle px-4 py-3 font-mono text-xs text-ink-secondary">
           {Object.entries(general).map(([path, messages]) => (
             <li key={path}>
-              <span className="text-error">{path}</span>: {messages.join(' ')}
+              <span className="text-error">{path}</span>:{' '}
+              {messages.map(translateApiMessage).join(' ')}
             </li>
           ))}
         </ul>

@@ -32,7 +32,7 @@ describe('ImportErrorsModal (FT-14, A46)', () => {
       .getByRole('heading', { name: 'quotes[1] · PRE-2026-0418' })
       .closest('article') as HTMLElement;
     expect(within(card).getByText('rules.0.type', { selector: 'code' })).toBeInTheDocument();
-    expect(within(card).getByText('The selected rules.0.type is invalid.')).toBeInTheDocument();
+    expect(within(card).getByText('El campo tipo de regla no es válido.')).toBeInTheDocument();
     expect(screen.getByText('batch')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Cerrar' })).toHaveFocus();
     await expectNoA11yViolations(container);
@@ -112,7 +112,7 @@ describe('ImportErrorsModal (FT-14, A46)', () => {
     };
     render(<ImportErrorsModal batch={fieldBatch} onRetry={onRetry} onClose={vi.fn()} />);
 
-    expect(screen.getByText(/"message": "The given data was invalid."/)).toBeInTheDocument();
+    expect(screen.getByText(/"message": "Los datos enviados no son válidos."/)).toBeInTheDocument();
     expect(screen.getByTestId('current-rules.0.type')).toHaveTextContent('type: "bogus"');
     expect(screen.getByTestId('current-rules.0.type')).toHaveClass('border-error');
     expect(screen.getByText('Regla 1 · bogus')).toBeInTheDocument();
