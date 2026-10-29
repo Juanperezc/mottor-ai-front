@@ -1,8 +1,9 @@
 # mottor-ai-front
 
 [![Release](https://img.shields.io/badge/release-v0.1.0-blue)](https://github.com/Juanperezc/mottor-ai-front/releases)
-[![Tests](https://img.shields.io/badge/tests-112%20passed-brightgreen?logo=vitest&logoColor=white)](#cobertura)
-[![Cobertura](https://img.shields.io/badge/coverage-97.97%25-brightgreen)](#cobertura)
+[![CI](https://github.com/Juanperezc/mottor-ai-front/actions/workflows/ci.yml/badge.svg?branch=staging)](https://github.com/Juanperezc/mottor-ai-front/actions/workflows/ci.yml)
+[![Tests](https://github.com/Juanperezc/mottor-ai-front/raw/badges/tests.svg)](#ci)
+[![Cobertura](https://github.com/Juanperezc/mottor-ai-front/raw/badges/coverage.svg)](#ci)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
@@ -178,6 +179,15 @@ Los componentes no llaman a `fetch`: usan acciones de los stores, que usan el cl
 ### Ticket
 
 `shared/ticket/lines.ts` sigue el pseudocódigo del [enunciado](docs/enunciado.html) y cuenta **code points** (`Array.from`), no unidades UTF-16 (ADR-04). Pasa los 17 casos de `ticket-cases.json`. Los fixtures los mantiene el back (`mottor-ai-back/tests/Fixtures/`); `src/test/fixtures.test.ts` verifica que las copias del front sean idénticas byte a byte (se saltea si el back no está al lado; `BACK_PATH` cambia la ruta).
+
+## CI
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) corre en cada PR y push a `staging` y `main`: lint (ESLint + Prettier), typecheck, build y Vitest con cobertura, en Node 20.
+
+- El resumen de cobertura queda en el _summary_ de cada corrida y el reporte completo (HTML, más el XML) se sube como artifact.
+- En cada push a `staging` el workflow regenera `coverage.svg` y `tests.svg` y los commitea en la rama huérfana `badges` con el `GITHUB_TOKEN`, sin servicios ni secrets externos. Los de `main` quedan en `badges/main/`.
+- Como el repo es privado, los badges del encabezado (CI, tests y cobertura) solo se ven si tenés acceso al repo y sesión iniciada en GitHub.
+- Los PRs de release los abre el workflow con el `GITHUB_TOKEN`, y GitHub no dispara otros workflows desde ese token: el CI no corre solo en esos PRs (se puede lanzar a mano con _Run workflow_).
 
 ## Cobertura
 
