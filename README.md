@@ -1,6 +1,28 @@
 # mottor-ai-front
 
-SPA en React + TypeScript (Vite) de **Mottor AI** (_Mottor.ai Senior Full-Stack Challenge_: "Calculadora de presupuestos con reglas comerciales"). Importa `dataset.json` en lotes, lista los presupuestos con conversión de moneda y muestra el detalle con el desglose regla por regla. No recalcula montos: el motor de reglas vive en [`mottor-ai-back`](https://github.com/Juanperezc/mottor-ai-back).
+[![Release](https://img.shields.io/badge/release-v0.1.0-blue)](https://github.com/Juanperezc/mottor-ai-front/releases)
+[![CI](https://github.com/Juanperezc/mottor-ai-front/actions/workflows/ci.yml/badge.svg?branch=staging)](https://github.com/Juanperezc/mottor-ai-front/actions/workflows/ci.yml)
+[![Tests](https://github.com/Juanperezc/mottor-ai-front/raw/badges/tests.svg)](#ci)
+[![Cobertura](https://github.com/Juanperezc/mottor-ai-front/raw/badges/coverage.svg)](#ci)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
+[![Node](https://img.shields.io/badge/Node-20-5FA04E?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Demo](https://img.shields.io/badge/demo-vercel-000000?logo=vercel&logoColor=white)](https://mottor-ai-front.vercel.app/quotes)
+
+SPA en React + TypeScript (Vite) de **Mottor AI** ([_Mottor.ai Senior Full-Stack Challenge_](docs/enunciado.html): "Calculadora de presupuestos con reglas comerciales"). Importa `dataset.json` en lotes, lista los presupuestos con conversión de moneda y muestra el detalle con el desglose regla por regla. No recalcula montos: el motor de reglas vive en [`mottor-ai-back`](https://github.com/Juanperezc/mottor-ai-back).
+
+## Demo y enunciado
+
+| Qué                                                                    | Dónde                                                                                                          |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Front (este repo)                                                      | https://mottor-ai-front.vercel.app/ (la app arranca en [`/quotes`](https://mottor-ai-front.vercel.app/quotes)) |
+| API ([`mottor-ai-back`](https://github.com/Juanperezc/mottor-ai-back)) | https://mottor.tulinkfacil.com/                                                                                |
+| Enunciado del challenge                                                | [`docs/enunciado.html`](docs/enunciado.html)                                                                   |
+| Diseño (Paper)                                                         | [Mottor AI – Quotes UI](https://app.paper.design/file/01M61XGWQBFD5567G483VM9SMK/p-1-0)                        |
+| Specs (SDD)                                                            | [`mottor-ai-specs`](https://github.com/Juanperezc/mottor-ai-specs)                                             |
+
+El enunciado es el HTML original, sin cambios. GitHub lo muestra como código: para leerlo con formato, descargalo y abrilo en el navegador. El deploy de Vercel apunta a la API publicada (`VITE_API_URL=https://mottor.tulinkfacil.com`).
 
 ## Specs
 
@@ -156,7 +178,16 @@ Los componentes no llaman a `fetch`: usan acciones de los stores, que usan el cl
 
 ### Ticket
 
-`shared/ticket/lines.ts` sigue el pseudocódigo del enunciado y cuenta **code points** (`Array.from`), no unidades UTF-16 (ADR-04). Pasa los 17 casos de `ticket-cases.json`. Los fixtures los mantiene el back (`mottor-ai-back/tests/Fixtures/`); `src/test/fixtures.test.ts` verifica que las copias del front sean idénticas byte a byte (se saltea si el back no está al lado; `BACK_PATH` cambia la ruta).
+`shared/ticket/lines.ts` sigue el pseudocódigo del [enunciado](docs/enunciado.html) y cuenta **code points** (`Array.from`), no unidades UTF-16 (ADR-04). Pasa los 17 casos de `ticket-cases.json`. Los fixtures los mantiene el back (`mottor-ai-back/tests/Fixtures/`); `src/test/fixtures.test.ts` verifica que las copias del front sean idénticas byte a byte (se saltea si el back no está al lado; `BACK_PATH` cambia la ruta).
+
+## CI
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) corre en cada PR y push a `staging` y `main`: lint (ESLint + Prettier), typecheck, build y Vitest con cobertura, en Node 20.
+
+- El resumen de cobertura queda en el _summary_ de cada corrida y el reporte completo (HTML, más el XML) se sube como artifact.
+- En cada push a `staging` el workflow regenera `coverage.svg` y `tests.svg` y los commitea en la rama huérfana `badges` con el `GITHUB_TOKEN`, sin servicios ni secrets externos. Los de `main` quedan en `badges/main/`.
+- Como el repo es privado, los badges del encabezado (CI, tests y cobertura) solo se ven si tenés acceso al repo y sesión iniciada en GitHub.
+- Los PRs de release los abre el workflow con el `GITHUB_TOKEN`, y GitHub no dispara otros workflows desde ese token: el CI no corre solo en esos PRs (se puede lanzar a mano con _Run workflow_).
 
 ## Cobertura
 

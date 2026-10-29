@@ -5,3 +5,4 @@ public/mockServiceWorker.js
 package-lock.json
 src/shared/ticket/__fixtures__
 src/mocks/*.json
+docs/enunciado.html
