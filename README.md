@@ -1,5 +1,14 @@
 # mottor-ai-front
 
+[![Release](https://img.shields.io/badge/release-v0.1.0-blue)](https://github.com/Juanperezc/mottor-ai-front/releases)
+[![Tests](https://img.shields.io/badge/tests-112%20passed-brightgreen?logo=vitest&logoColor=white)](#cobertura)
+[![Cobertura](https://img.shields.io/badge/coverage-97.97%25-brightgreen)](#cobertura)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
+[![Node](https://img.shields.io/badge/Node-20-5FA04E?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Demo](https://img.shields.io/badge/demo-vercel-000000?logo=vercel&logoColor=white)](https://mottor-ai-front.vercel.app/quotes)
+
 SPA en React + TypeScript (Vite) de **Mottor AI** ([_Mottor.ai Senior Full-Stack Challenge_](docs/enunciado.html): "Calculadora de presupuestos con reglas comerciales"). Importa `dataset.json` en lotes, lista los presupuestos con conversión de moneda y muestra el detalle con el desglose regla por regla. No recalcula montos: el motor de reglas vive en [`mottor-ai-back`](https://github.com/Juanperezc/mottor-ai-back).
 
 ## Demo y enunciado
