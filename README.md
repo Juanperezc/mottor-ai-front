@@ -1,6 +1,18 @@
 # mottor-ai-front
 
-SPA en React + TypeScript (Vite) de **Mottor AI** (_Mottor.ai Senior Full-Stack Challenge_: "Calculadora de presupuestos con reglas comerciales"). Importa `dataset.json` en lotes, lista los presupuestos con conversión de moneda y muestra el detalle con el desglose regla por regla. No recalcula montos: el motor de reglas vive en [`mottor-ai-back`](https://github.com/Juanperezc/mottor-ai-back).
+SPA en React + TypeScript (Vite) de **Mottor AI** ([_Mottor.ai Senior Full-Stack Challenge_](docs/enunciado.html): "Calculadora de presupuestos con reglas comerciales"). Importa `dataset.json` en lotes, lista los presupuestos con conversión de moneda y muestra el detalle con el desglose regla por regla. No recalcula montos: el motor de reglas vive en [`mottor-ai-back`](https://github.com/Juanperezc/mottor-ai-back).
+
+## Demo y enunciado
+
+| Qué                                                                    | Dónde                                                                                                          |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Front (este repo)                                                      | https://mottor-ai-front.vercel.app/ (la app arranca en [`/quotes`](https://mottor-ai-front.vercel.app/quotes)) |
+| API ([`mottor-ai-back`](https://github.com/Juanperezc/mottor-ai-back)) | https://mottor.tulinkfacil.com/                                                                                |
+| Enunciado del challenge                                                | [`docs/enunciado.html`](docs/enunciado.html)                                                                   |
+| Diseño (Paper)                                                         | [Mottor AI – Quotes UI](https://app.paper.design/file/01M61XGWQBFD5567G483VM9SMK/p-1-0)                        |
+| Specs (SDD)                                                            | [`mottor-ai-specs`](https://github.com/Juanperezc/mottor-ai-specs)                                             |
+
+El enunciado es el HTML original, sin cambios. GitHub lo muestra como código: para leerlo con formato, descargalo y abrilo en el navegador. El deploy de Vercel apunta a la API publicada (`VITE_API_URL=https://mottor.tulinkfacil.com`).
 
 ## Specs
 
@@ -156,7 +168,7 @@ Los componentes no llaman a `fetch`: usan acciones de los stores, que usan el cl
 
 ### Ticket
 
-`shared/ticket/lines.ts` sigue el pseudocódigo del enunciado y cuenta **code points** (`Array.from`), no unidades UTF-16 (ADR-04). Pasa los 17 casos de `ticket-cases.json`. Los fixtures los mantiene el back (`mottor-ai-back/tests/Fixtures/`); `src/test/fixtures.test.ts` verifica que las copias del front sean idénticas byte a byte (se saltea si el back no está al lado; `BACK_PATH` cambia la ruta).
+`shared/ticket/lines.ts` sigue el pseudocódigo del [enunciado](docs/enunciado.html) y cuenta **code points** (`Array.from`), no unidades UTF-16 (ADR-04). Pasa los 17 casos de `ticket-cases.json`. Los fixtures los mantiene el back (`mottor-ai-back/tests/Fixtures/`); `src/test/fixtures.test.ts` verifica que las copias del front sean idénticas byte a byte (se saltea si el back no está al lado; `BACK_PATH` cambia la ruta).
 
 ## Cobertura
 
