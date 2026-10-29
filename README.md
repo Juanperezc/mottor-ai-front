@@ -178,3 +178,31 @@ staging ──► feat/<scope>-<descripcion> ──PR──► staging ──PR 
 - PR a `staging` con CI verde y review. Para liberar, PR de `staging` a `main`. Sin commits directos a `staging` ni a `main`.
 - [Conventional Commits](https://www.conventionalcommits.org/): `<type>(<scope opcional>): <descripción en imperativo>`.
 - Cada PR completa [`.github/pull_request_template.md`](.github/pull_request_template.md) con `Spec: 001-quotes-mvp` y `Tasks: FT-xx`. Al mergear, se marcan las tareas `[x]` en mottor-ai-specs.
+
+## Versionado y releases
+
+Las versiones siguen [SemVer](https://semver.org/) (`vX.Y.Z`) y se calculan solas a partir de los commits en [Conventional Commits](https://www.conventionalcommits.org/) que están en `staging` y todavía no en `main`:
+
+| Commits pendientes                                   | Bump                             |
+| ---------------------------------------------------- | -------------------------------- |
+| `tipo!:` o un footer `BREAKING CHANGE:`              | major (minor mientras sea `0.x`) |
+| `feat`                                               | minor                            |
+| `fix`, `perf`, `refactor`, `revert`                  | patch                            |
+| solo `docs`, `chore`, `test`, `ci`, `style`, `build` | patch                            |
+
+Se parte del último tag `vX.Y.Z` alcanzable desde `main` (o de `v0.0.0` si no hay ninguno). Mientras la versión sea `0.x`, un cambio incompatible sube el minor en lugar del major.
+
+Cómo funciona ([`.github/workflows/release.yml`](.github/workflows/release.yml)):
+
+1. Cada push a `staging` corre [`scripts/release-pr.sh`](scripts/release-pr.sh), que abre o actualiza un único PR `staging` → `main` con la label `release`, el título `release: vX.Y.Z` y las notas agrupadas (¿Qué hay de nuevo?, Correcciones, Otros). Si `staging` no tiene cambios respecto de `main`, cierra ese PR.
+2. Al mergear el PR de release, [`scripts/release-tag.sh`](scripts/release-tag.sh) crea el tag anotado `vX.Y.Z` sobre el merge commit de `main` y la GitHub Release con las mismas notas. Después adelanta `staging` hasta `main` si es fast-forward; si no, lo deja como está y avisa en el log.
+
+El PR de release se mergea con **merge commit**, no con squash ni rebase: así los commits de `staging` quedan en `main` y el historial no se rompe.
+
+Para verlo a mano sin tocar GitHub (solo hace falta `git` y `gh` autenticado):
+
+```bash
+./scripts/release-pr.sh --dry-run                 # versión y notas que calcularía
+./scripts/release-pr.sh                           # crea o actualiza el PR de release
+./scripts/release-tag.sh <número-de-PR> --dry-run # qué tag y release crearía
+```
