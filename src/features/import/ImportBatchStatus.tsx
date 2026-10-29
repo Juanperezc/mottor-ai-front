@@ -1,6 +1,7 @@
 import { memo, useEffect, useMemo, useState } from 'react';
 import { Check, Circle, Clock, PauseCircle, TriangleAlert, X } from 'lucide-react';
 import { formatInteger } from '../../shared/money/formatMoney';
+import { translateApiMessage } from '../../shared/http/messages';
 import type { ImportMode } from '../../shared/settings/useSettingsStore';
 import { IconText } from '../../shared/ui/IconText';
 import { InfoTooltip } from '../../shared/ui/InfoTooltip';
@@ -176,7 +177,7 @@ export function ImportBatchStatus({
           className="flex items-center gap-2 rounded-md bg-error-subtle px-3 py-2.5 text-sm text-error"
         >
           <TriangleAlert aria-hidden className="size-4 shrink-0" />
-          {file.error}
+          {translateApiMessage(file.error)}
         </p>
       )}
       {paused && (

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { ApiError, api, failureReason, unwrap, type ImportStatus } from '../../api/client';
 import type { components } from '../../api/schema';
 import type { FieldErrors } from '../../shared/http/validation';
+import { translateApiMessage } from '../../shared/http/messages';
 import { subscribeImport, type SubscribeImport } from '../../shared/realtime/echo';
 import type { ImportMode } from '../../shared/settings/useSettingsStore';
 import { chunk } from './parseDataset';
@@ -76,6 +77,11 @@ const counters = (batches: ImportBatch[]) => ({
   failedBatches: batches.filter((b) => b.state.status === 'failed').length,
 });
 
+const translateErrors = (errors: FieldErrors): FieldErrors =>
+  Object.fromEntries(
+    Object.entries(errors).map(([path, messages]) => [path, messages.map(translateApiMessage)]),
+  );
+
 /** Combined numbers for the page header and banner (counts of quotes and batches, not money). */
 export const totals = (files: FileImport[]) => ({
   total: files.reduce((sum, f) => sum + f.total, 0),
@@ -136,8 +142,11 @@ export const useImportStore = create<ImportState>()((set, get) => {
           // The server answered: the batch is atomic, so nothing was written.
           setBatch(id, batch.number, {
             status: 'failed',
-            errors: error.status === 422 ? error.errors : { batch: [error.message] },
-            message: error.message,
+            errors:
+              error.status === 422
+                ? translateErrors(error.errors)
+                : { batch: [translateApiMessage(error.message)] },
+            message: translateApiMessage(error.message),
           });
           continue;
         }
@@ -175,7 +184,10 @@ export const useImportStore = create<ImportState>()((set, get) => {
       setFile(id, {
         status: 'failed',
         finishedAt: Date.now(),
-        error: error instanceof ApiError ? error.message : 'No se pudo conectar con el servidor.',
+        error:
+          error instanceof ApiError
+            ? translateApiMessage(error.message)
+            : 'No se pudo conectar con el servidor.',
       });
       return;
     }
@@ -199,7 +211,7 @@ export const useImportStore = create<ImportState>()((set, get) => {
             event.batch,
             event.status === 'processed'
               ? { status: 'imported', imported: event.imported }
-              : { status: 'failed', errors: event.errors },
+              : { status: 'failed', errors: translateErrors(event.errors) },
           );
         },
         onCompleted: (event) =>
@@ -301,7 +313,11 @@ export const useImportStore = create<ImportState>()((set, get) => {
           setBatch(
             fileId,
             number,
-            { status: 'failed', errors: error.errors, message: error.message },
+            {
+              status: 'failed',
+              errors: translateErrors(error.errors),
+              message: translateApiMessage(error.message),
+            },
             quotes,
           );
           return { ok: false, message: 'El lote sigue teniendo errores.' };
@@ -310,7 +326,7 @@ export const useImportStore = create<ImportState>()((set, get) => {
           ok: false,
           message:
             error instanceof ApiError
-              ? error.message
+              ? translateApiMessage(error.message)
               : 'Sin respuesta del servidor: el resultado es desconocido. Revisá el listado antes de reintentar.',
         };
       }

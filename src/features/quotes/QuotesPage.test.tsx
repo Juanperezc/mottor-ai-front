@@ -116,6 +116,79 @@ describe('QuotesPage (FT-15, FT-16)', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Página anterior' }));
     await waitFor(() => expect(screen.getByText('Cliente 196')).toBeInTheDocument());
   });
+
+  it('renders the selected 50, 100 and 200 rows and resets pagination for 10,001 quotes', async () => {
+    const seen: URLSearchParams[] = [];
+    server.use(
+      http.get(`${API}/quotes`, ({ request }) => {
+        const params = new URL(request.url).searchParams;
+        seen.push(params);
+        const page = Number(params.get('page') ?? 1);
+        const perPage = Number(params.get('per_page') ?? 50);
+        const from = (page - 1) * perPage;
+        const count = Math.max(0, Math.min(perPage, 10001 - from));
+        return HttpResponse.json({
+          data: Array.from({ length: count }, (_, index) => {
+            const id = from + index + 1;
+            return {
+              id,
+              budget_id: `B-${id}`,
+              client: `Cliente ${id}`,
+              event: 'Evento',
+              event_lines: ['Evento'],
+              original_currency: 'ARS',
+              original_total: 1,
+              currency: 'ARS',
+              total: 1,
+            };
+          }),
+          meta: { page, per_page: perPage, total: 10001, last_page: Math.ceil(10001 / perPage) },
+        });
+      }),
+    );
+    const { router } = renderRoute('/quotes');
+    const rowCount = () => screen.getAllByRole('row').length - 1;
+
+    await screen.findByText('Cliente 1');
+    expect(rowCount()).toBe(50);
+    expect(screen.getByText('Página 1 de 201 · 50 por página')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Página 201' }));
+    await screen.findByText('Cliente 10001');
+    expect(rowCount()).toBe(1);
+    expect(screen.getByText('Página 201 de 201 · 50 por página')).toBeInTheDocument();
+
+    await userEvent.selectOptions(screen.getByLabelText('Por página'), '100');
+    await screen.findByText('Cliente 1');
+    expect(rowCount()).toBe(100);
+    expect(router.state.location.search).toContain('page=1');
+    expect(router.state.location.search).toContain('per_page=100');
+    expect(screen.getByText('Página 1 de 101 · 100 por página')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Página 101' }));
+    await screen.findByText('Cliente 10001');
+    expect(rowCount()).toBe(1);
+
+    await userEvent.selectOptions(screen.getByLabelText('Por página'), '200');
+    await screen.findByText('Cliente 1');
+    expect(rowCount()).toBe(200);
+    expect(screen.getByText('Página 1 de 51 · 200 por página')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Página 51' }));
+    await screen.findByText('Cliente 10001');
+    expect(rowCount()).toBe(1);
+    await userEvent.type(screen.getByLabelText('Cliente'), 'norte');
+    await waitFor(() => {
+      expect(router.state.location.search).toContain('client=norte');
+      expect(router.state.location.search).toContain('page=1');
+    });
+    await screen.findByText('Cliente 1');
+    expect(router.state.location.search).toContain('page=1');
+    expect(rowCount()).toBe(200);
+    expect(
+      seen.some((params) => params.get('client') === 'norte' && params.get('page') === '1'),
+    ).toBe(true);
+  });
 });
 
 describe('QuotesPage mobile (Paper 03 · Listado — Mobile)', () => {

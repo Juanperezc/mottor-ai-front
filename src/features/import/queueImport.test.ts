@@ -182,7 +182,7 @@ describe('queue import (A45, FT-12)', () => {
 
     expect(file(0)).toMatchObject({
       status: 'failed',
-      error: 'The JSON must contain a quotes array.',
+      error: 'El JSON debe incluir una lista de presupuestos.',
     });
     expect(file(1)).toMatchObject({ status: 'done', imported: 1 });
     expect(store().status).toBe('failed');

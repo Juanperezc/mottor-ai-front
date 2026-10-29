@@ -1,12 +1,23 @@
 import expected from '../../mocks/official-case.expected.json';
 import type { QuoteDetail } from '../../api/client';
-import { conversionHint, rateChip } from './exchangeRates';
+import { conversionHint, normalizeRates, rateChip } from './exchangeRates';
 
 const quote = expected as QuoteDetail;
 const usdItem = quote.items.find((item) => item.currency === 'USD');
 if (!usdItem) throw new Error('Expected the official fixture to contain a USD item.');
 
 describe('exchange rates (WEB-09)', () => {
+  it.each([{}, [], null, undefined])(
+    'normalizes empty or absent rates %j to an empty object',
+    (rates) => {
+      expect(normalizeRates(rates)).toEqual({});
+    },
+  );
+
+  it('keeps valid numeric exchange rate entries', () => {
+    expect(normalizeRates({ USD_ARS: 1450, invalid: '1.2' })).toEqual({ USD_ARS: 1450 });
+  });
+
   it('formats one chip per stored pair', () => {
     expect(rateChip('USD_ARS', 1450)).toBe('1 USD = 1.450,00 ARS');
     expect(rateChip('weird', 2)).toBe('weird = 2,00');

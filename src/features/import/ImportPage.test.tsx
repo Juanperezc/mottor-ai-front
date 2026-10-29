@@ -63,6 +63,7 @@ describe('ImportPage (FT-10, FT-11, FT-13)', () => {
     await userEvent.click(screen.getAllByRole('button', { name: 'Ver errores' })[0] as HTMLElement);
     const dialog = screen.getByRole('dialog', { name: 'Errores del lote 2' });
     expect(within(dialog).getByText('currency', { selector: 'code' })).toBeInTheDocument();
+    expect(within(dialog).getByText('El formato de moneda no es válido.')).toBeInTheDocument();
     await userEvent.click(within(dialog).getByRole('button', { name: 'Reintentar lote' }));
 
     expect(await screen.findByText(/Importación terminada: 501 de 501/)).toBeInTheDocument();

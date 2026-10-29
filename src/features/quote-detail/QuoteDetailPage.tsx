@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router';
 import { FileQuestion } from 'lucide-react';
 import type { QuoteDetail } from '../../api/client';
 import { isKnownRuleType } from '../../content/glossary';
+import { labelForCategory, labelForRuleType } from '../../content/labels';
 import { formatCodeAmount, formatMoney, formatSigned } from '../../shared/money/formatMoney';
 import { lines } from '../../shared/ticket/lines';
 import { buildTicket, type TicketTexts } from '../../shared/ticket/printedTicket';
@@ -75,7 +76,7 @@ function ItemsTable({ quote, editor }: { quote: QuoteDetail; editor: Editor }) {
                 <tr key={item.id} className="border-b border-border align-top">
                   <td className="py-4 pr-4">
                     <ItemDescriptionEditor
-                      label={item.category}
+                      label={labelForCategory(item.category)}
                       name={item.description}
                       value={text}
                       original={item.description}
@@ -88,7 +89,9 @@ function ItemsTable({ quote, editor }: { quote: QuoteDetail; editor: Editor }) {
                       <Lines
                         rows={text === item.description ? item.description_lines : lines(text)}
                       />
-                      <span className="eyebrow-sm text-ink-muted">{item.category}</span>
+                      <span className="eyebrow-sm normal-case text-ink-muted">
+                        {labelForCategory(item.category)}
+                      </span>
                     </ItemDescriptionEditor>
                   </td>
                   <td className={`${num} py-4 text-ink-secondary`}>{item.quantity}</td>
@@ -139,7 +142,7 @@ function RuleCell({
             type: {step.type}
           </span>
         </span>
-        <span className="eyebrow-sm text-ink-muted">tipo desconocido</span>
+        <span className="eyebrow-sm normal-case text-ink-muted">tipo desconocido</span>
       </>
     );
   }
@@ -149,7 +152,7 @@ function RuleCell({
     <>
       <span className="block">{step.label}</span>
       <span className="flex items-center gap-1">
-        <span className="eyebrow-sm text-ink-muted">{step.type}</span>
+        <span className="eyebrow-sm normal-case text-ink-muted">{labelForRuleType(step.type)}</span>
         <InfoTooltip term={foreignFixedDiscount ? 'foreignFixedDiscount' : step.type} />
       </span>
     </>
@@ -287,7 +290,11 @@ function Detail({ quote }: { quote: QuoteDetail }) {
               onClose={() => editor.setEditing(null)}
               onChange={(value) => editor.setText(EVENT, value)}
             >
-              {editor.texts.event}
+              <Lines
+                rows={
+                  editor.texts.event === quote.event ? quote.event_lines : lines(editor.texts.event)
+                }
+              />
             </ItemDescriptionEditor>
             {editor.editing !== EVENT && <InfoTooltip term="event" className="mt-0.5" />}
           </span>
