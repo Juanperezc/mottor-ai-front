@@ -20,6 +20,11 @@ describe('QuoteDetailPage (FT-17, FT-18)', () => {
       .slice(1);
     expect(items).toHaveLength(6);
     expect(text(items[2] as HTMLElement)).toContain('USD 1.200,00');
+    expect(within(items[2] as HTMLElement).getByText('Sonido')).toHaveClass('normal-case');
+
+    const breakdown = screen.getByRole('region', { name: 'Desglose paso a paso' });
+    const firstRule = within(breakdown).getAllByRole('row')[2] as HTMLElement;
+    expect(within(firstRule).getByText('Promo por cantidad')).toHaveClass('normal-case');
 
     const steps = within(screen.getByRole('region', { name: 'Desglose paso a paso' }))
       .getAllByRole('row')
@@ -34,6 +39,39 @@ describe('QuoteDetailPage (FT-17, FT-18)', () => {
     expect(text(screen.getByText(/4\.722\.388,00/, { selector: 'dd' }))).toBe('$ 4.722.388,00');
     expect(text(screen.getByText(/4\.878\.500,00/, { selector: 'dd' }))).toBe('$ 4.878.500,00');
     await expectNoA11yViolations(container);
+  });
+
+  it('renders saved event and item lines as blocks without truncation', async () => {
+    server.use(
+      http.get(`${API}/quotes/:id`, () =>
+        HttpResponse.json({
+          ...expected,
+          items: expected.items.map((item, index) =>
+            index === 0
+              ? {
+                  ...item,
+                  description: 'Texto largo del ítem que ocupa dos líneas',
+                  description_lines: ['Texto largo del ítem que', 'ocupa dos líneas'],
+                }
+              : item,
+          ),
+        }),
+      ),
+    );
+    renderRoute('/quotes/17');
+
+    const eventLine = (await screen.findAllByText('Lanzamiento de producto ·'))[0];
+    if (!eventLine) throw new Error('Expected the first event line in the header.');
+    expect(eventLine).toHaveClass('block');
+    expect(screen.getByText('120 personas', { selector: 'span.block' })).toBeInTheDocument();
+    expect(screen.queryByText('Lanzamiento de producto · 120 personas')).not.toBeInTheDocument();
+
+    const itemRegion = screen.getByRole('region', { name: 'Ítems' });
+    const firstItemLine = within(itemRegion).getAllByText('Texto largo del ítem que')[0];
+    if (!firstItemLine) throw new Error('Expected the first item description line.');
+    expect(firstItemLine).toHaveClass('block');
+    expect(firstItemLine.nextElementSibling).toHaveTextContent('ocupa dos líneas');
+    expect(firstItemLine.closest('td')?.className).not.toMatch(/truncate|whitespace-nowrap/);
   });
 
   it('shows the stored rates and explains foreign items with payload values only (WEB-09)', async () => {
@@ -72,21 +110,26 @@ describe('QuoteDetailPage (FT-17, FT-18)', () => {
     ).toBeInTheDocument();
   });
 
-  it('says "Sin conversión" when exchange_rates is empty', async () => {
-    server.use(
-      http.get(`${API}/quotes/:id`, () =>
-        HttpResponse.json({
-          ...expected,
-          exchange_rates: {},
-          items: expected.items.filter((item) => item.currency === 'ARS'),
+  it.each([{}, [], null, undefined])(
+    'says "Sin conversión" for invalid or empty rates %j',
+    async (rates) => {
+      server.use(
+        http.get(`${API}/quotes/:id`, () => {
+          const detail: Record<string, unknown> = {
+            ...expected,
+            items: expected.items.filter((item) => item.currency === 'ARS'),
+          };
+          if (rates === undefined) delete detail.exchange_rates;
+          else detail.exchange_rates = rates;
+          return HttpResponse.json(detail);
         }),
-      ),
-    );
-    renderRoute('/quotes/17');
-    const rates = await screen.findByRole('list', { name: 'Tasas guardadas' });
-    expect(rates).toHaveTextContent('Sin conversión');
-    expect(screen.queryByRole('button', { name: /USD/ })).not.toBeInTheDocument();
-  });
+      );
+      renderRoute('/quotes/17');
+      const ratesList = await screen.findByRole('list', { name: 'Tasas guardadas' });
+      expect(ratesList).toHaveTextContent('Sin conversión');
+      expect(screen.queryByRole('button', { name: /USD/ })).not.toBeInTheDocument();
+    },
+  );
 
   it('edits an item inline, previews its rows and reflects it on the printed ticket (WEB-12)', async () => {
     renderRoute('/quotes/17');
@@ -109,11 +152,24 @@ describe('QuoteDetailPage (FT-17, FT-18)', () => {
     await userEvent.type(box, 'Pantalla LED 6×3 m con operador técnico');
     expect(within(editor).getByText('39 caracteres · 2/4 renglones')).toBeInTheDocument();
     expect(ticket).toHaveTextContent('operador técnico');
-
-    await userEvent.click(within(editor).getByRole('button', { name: 'Restablecer' }));
-    expect(box).toHaveValue('Sistema de sonido line array');
-
     await userEvent.click(within(editor).getByRole('button', { name: 'Cerrar edición' }));
+    const itemTable = screen.getByRole('region', { name: 'Ítems' });
+    expect(within(itemTable).getByText('Pantalla LED 6×3 m con')).toHaveClass('block');
+    expect(within(itemTable).getByText('operador técnico')).toHaveClass('block');
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Editar Sistema de sonido line array' }),
+    );
+    const reopenedEditor = screen.getByRole('group', {
+      name: 'Editando Sistema de sonido line array',
+    });
+    const reopenedBox = within(reopenedEditor).getByLabelText(
+      'Texto de Sistema de sonido line array',
+    );
+    await userEvent.click(within(reopenedEditor).getByRole('button', { name: 'Restablecer' }));
+    expect(reopenedBox).toHaveValue('Sistema de sonido line array');
+
+    await userEvent.click(within(reopenedEditor).getByRole('button', { name: 'Cerrar edición' }));
     expect(screen.queryByRole('group', { name: /Editando/ })).not.toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'Editar Sistema de sonido line array' }),
