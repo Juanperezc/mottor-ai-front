@@ -1,0 +1,7 @@
+dist
+coverage
+src/api/schema.d.ts
+public/mockServiceWorker.js
+package-lock.json
+src/shared/ticket/__fixtures__
+src/mocks/*.json

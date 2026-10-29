@@ -1,0 +1,11 @@
+node_modules
+dist
+coverage
+.env
+.env.local
+*.log
+.DS_Store
+*.tsbuildinfo
+
+# Local reports (not versioned)
+_reports/
